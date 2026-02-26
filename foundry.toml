@@ -7,11 +7,9 @@ cache = true
 cache_path = "cache"
 broadcast = "broadcast"
 
-# Import remappings
 remappings = [
-    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-    "@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/",
-    "@forge-std/=lib/forge-std/src/"
+    '@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/',
+    '@openzeppelin/contracts=lib/openzeppelin-contracts/contracts',
 ]
 
 solc_version = "0.8.34"
