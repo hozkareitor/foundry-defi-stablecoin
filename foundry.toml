@@ -10,7 +10,22 @@ broadcast = "broadcast"
 remappings = [
     '@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/',
     '@openzeppelin/contracts=lib/openzeppelin-contracts/contracts',
+    'forge-std/=lib/forge-std/src/',
 ]
+
+[fuzz]
+runs = 1000
+max_test_rejects = 65536
+seed = "0x01"  # String hexadecimal con comillas
+dictionary_weight = 40
+include_storage = true
+include_push_bytes = true
+
+[invariant]
+runs = 100
+depth = 100
+fail_on_revert = false
+call_override = false
 
 solc_version = "0.8.34"
 evm_version = "paris"

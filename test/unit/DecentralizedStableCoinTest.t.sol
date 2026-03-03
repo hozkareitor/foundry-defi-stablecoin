@@ -12,18 +12,18 @@ contract DecentralizedStableCoinTest is StdCheats, Test {
 
     DecentralizedStableCoin dsc;
     address owner;
-    address user = address(1);
-    address nonOwner = address(2);
+    address user = makeAddr("user");
+    address nonOwner = makeAddr("nonOwner");
 
     function setUp() public {
         owner = makeAddr("owner");
         dsc = new DecentralizedStableCoin(owner);
     }
 
-    ///////////////////////
-    // Constructor Tests //
-    ///////////////////////  
-    
+    /////////////////////////////
+    // Constructor Tests       //
+    /////////////////////////////
+
     function test_ConstructorSetsOwner() public view {
         assertEq(dsc.owner(), owner);
     }
@@ -38,9 +38,9 @@ contract DecentralizedStableCoinTest is StdCheats, Test {
         new DecentralizedStableCoin(address(0));
     }
 
-    ///////////////////////
-    //    Mint Tests     //
-    ///////////////////////  
+    /////////////////////////////
+    // Mint Tests              //
+    /////////////////////////////
 
     function test_RevertWhen_MintAmountIsZero() public {
         vm.prank(owner);
@@ -99,13 +99,13 @@ contract DecentralizedStableCoinTest is StdCheats, Test {
         assertEq(dsc.totalSupply(), 80 ether);
     }
 
-    ///////////////////////
-    //    Burn Tests     //
-    /////////////////////// 
+    /////////////////////////////
+    // Burn Tests              //
+    /////////////////////////////
 
     function test_RevertWhen_BurnAmountIsZero() public {
         vm.prank(owner);
-        dsc.mint(owner, 100 ether);  // Mint to owner
+        dsc.mint(owner, 100 ether);
         
         vm.prank(owner);
         vm.expectRevert(DecentralizedStableCoin.DecentralizedStableCoin__AmountMustBeGreaterThanZero.selector);
@@ -114,7 +114,7 @@ contract DecentralizedStableCoinTest is StdCheats, Test {
 
     function test_RevertWhen_BurnAmountExceedsBalance() public {
         vm.prank(owner);
-        dsc.mint(owner, 100 ether);  // Mint to owner
+        dsc.mint(owner, 100 ether);
         
         vm.prank(owner);
         vm.expectRevert(DecentralizedStableCoin.DecentralizedStableCoin__BurnAmountExceedsBalance.selector);
@@ -132,7 +132,7 @@ contract DecentralizedStableCoinTest is StdCheats, Test {
 
     function test_BurnSuccess() public {
         vm.prank(owner);
-        dsc.mint(owner, 100 ether);  // Mint to owner
+        dsc.mint(owner, 100 ether);
         
         vm.prank(owner);
         dsc.burn(40 ether);
@@ -143,17 +143,17 @@ contract DecentralizedStableCoinTest is StdCheats, Test {
 
     function test_BurnEmitsEvent() public {
         vm.prank(owner);
-        dsc.mint(owner, 100 ether);  // Mint to owner
+        dsc.mint(owner, 100 ether);
         
         vm.prank(owner);
         vm.expectEmit(true, true, true, true, address(dsc));
-        emit Burn(owner, 40 ether);  // From owner, not user
+        emit Burn(owner, 40 ether);
         dsc.burn(40 ether);
     }
 
     function test_BurnAllTokens() public {
         vm.prank(owner);
-        dsc.mint(owner, 100 ether);  // Mint to owner
+        dsc.mint(owner, 100 ether);
         
         vm.prank(owner);
         dsc.burn(100 ether);
@@ -178,7 +178,7 @@ contract DecentralizedStableCoinTest is StdCheats, Test {
     function test_BurnAfterMaxMint() public {
         vm.prank(owner);
         uint256 maxAmount = type(uint256).max;
-        dsc.mint(owner, maxAmount);  // Mint to owner
+        dsc.mint(owner, maxAmount);
         
         vm.prank(owner);
         dsc.burn(maxAmount);
@@ -187,9 +187,9 @@ contract DecentralizedStableCoinTest is StdCheats, Test {
         assertEq(dsc.totalSupply(), 0);
     }
 
-    ///////////////////////////
-    // ERC20 Standard  Tests //
-    ///////////////////////////
+    /////////////////////////////
+    // ERC20 Standard Tests    //
+    /////////////////////////////
 
     function test_Transfer() public {
         address user2 = makeAddr("user2");
@@ -198,7 +198,8 @@ contract DecentralizedStableCoinTest is StdCheats, Test {
         dsc.mint(user, 100 ether);
         
         vm.prank(user);
-        dsc.transfer(user2, 30 ether);
+        bool success = dsc.transfer(user2, 30 ether);
+        assertTrue(success);
         
         assertEq(dsc.balanceOf(user), 70 ether);
         assertEq(dsc.balanceOf(user2), 30 ether);
@@ -212,19 +213,53 @@ contract DecentralizedStableCoinTest is StdCheats, Test {
         dsc.mint(user, 100 ether);
         
         vm.prank(user);
-        dsc.approve(spender, 50 ether);
+        bool approveSuccess = dsc.approve(spender, 50 ether);
+        assertTrue(approveSuccess);
         
         vm.prank(spender);
-        dsc.transferFrom(user, user2, 30 ether);
+        bool transferSuccess = dsc.transferFrom(user, user2, 30 ether);
+        assertTrue(transferSuccess);
         
         assertEq(dsc.balanceOf(user), 70 ether);
         assertEq(dsc.balanceOf(user2), 30 ether);
         assertEq(dsc.allowance(user, spender), 20 ether);
     }
 
-    ///////////////////////
-    //  Owner Functions  //
-    ///////////////////////
+    function test_TransferFromWithInsufficientAllowance() public {
+        address spender = makeAddr("spender");
+        address user2 = makeAddr("user2");
+        
+        vm.prank(owner);
+        dsc.mint(user, 100 ether);
+        
+        vm.prank(user);
+        dsc.approve(spender, 10 ether);
+        
+        vm.prank(spender);
+        vm.expectRevert();
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        dsc.transferFrom(user, user2, 30 ether);
+    }
+
+    function test_TransferFromWithInsufficientBalance() public {
+        address spender = makeAddr("spender");
+        address user2 = makeAddr("user2");
+        
+        vm.prank(owner);
+        dsc.mint(user, 10 ether);
+        
+        vm.prank(user);
+        dsc.approve(spender, 20 ether);
+        
+        vm.prank(spender);
+        vm.expectRevert();
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        dsc.transferFrom(user, user2, 20 ether);
+    }
+
+    /////////////////////////////
+    // Owner Functions         //
+    /////////////////////////////
 
     function test_TransferOwnership() public {
         address newOwner = makeAddr("newOwner");
@@ -243,10 +278,14 @@ contract DecentralizedStableCoinTest is StdCheats, Test {
 
     function test_RevertWhen_TransferOwnershipToZeroAddress() public {
         vm.prank(owner);
-        // OZ's ownable already validates address zero with its own error
+        // OpenZeppelin's Ownable lanza OwnableInvalidOwner, no nuestro error
         vm.expectRevert(abi.encodeWithSignature("OwnableInvalidOwner(address)", address(0)));
         dsc.transferOwnership(address(0));
     }
+
+    /////////////////////////////
+    // Ownership Events        //
+    /////////////////////////////
 
     function test_TransferOwnershipEmitsEvent() public {
         address newOwner = makeAddr("newOwner");
@@ -257,9 +296,9 @@ contract DecentralizedStableCoinTest is StdCheats, Test {
         dsc.transferOwnership(newOwner);
     }
 
-    ///////////////////////////
-    //  Decay Functions      //
-    ///////////////////////////
+    /////////////////////////////
+    // Decimals Test           //
+    /////////////////////////////
 
     function test_Decimals() public view {
         assertEq(dsc.decimals(), 18);

@@ -6,7 +6,7 @@ import { DSCEngine } from "../../src/DSCEngine.sol";
 import { DecentralizedStableCoin } from "../../src/DecentralizedStableCoin.sol";
 import { HelperConfig } from "../../script/HelperConfig.s.sol";
 import { ERC20Mock } from "../../test/mocks/ERC20Mock.sol";
-import { Test, Vm } from "forge-std/Test.sol";
+import { Test} from "forge-std/Test.sol";
 import { MockV3Aggregator } from "../mocks/MockV3Aggregator.sol";
 
 contract DSCEngineTest is Test {
@@ -502,7 +502,7 @@ contract DSCEngineTest is Test {
         dsce.mintDsc(mintAmount);
         
         uint256 healthFactor = dsce.getHealthFactor(user);
-        uint256 expectedHealthFactor = (totalValue * 50 / 100) * 1e18 / mintAmount;
+        uint256 expectedHealthFactor = (totalValue * 50 * 1e18) / (100 * mintAmount);
         assertEq(healthFactor, expectedHealthFactor);
         
         vm.stopPrank();
@@ -583,7 +583,6 @@ contract DSCEngineTest is Test {
         uint256 minted = dsce.getDscMinted(user);
         dsc.approve(address(dsce), minted);
         
-        uint256 collateralBefore = dsce.getCollateralBalanceOfUser(user, weth);
         dsce.redeemCollateralForDsc(weth, AMOUNT_COLLATERAL, minted);
         
         assertEq(dsce.getCollateralBalanceOfUser(user, weth), 0);
