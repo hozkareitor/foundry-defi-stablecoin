@@ -278,7 +278,6 @@ contract DecentralizedStableCoinTest is StdCheats, Test {
 
     function test_RevertWhen_TransferOwnershipToZeroAddress() public {
         vm.prank(owner);
-        // OpenZeppelin's Ownable lanza OwnableInvalidOwner, no nuestro error
         vm.expectRevert(abi.encodeWithSignature("OwnableInvalidOwner(address)", address(0)));
         dsc.transferOwnership(address(0));
     }

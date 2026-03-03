@@ -1,66 +1,140 @@
-## Foundry
+# Decentralized Stable Coin (DSC)
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Foundry](https://img.shields.io/badge/Built%20with-Foundy-000000.svg)](https://getfoundry.sh/)
 
-Foundry consists of:
+A decentralized, over-collateralized stablecoin protocol inspired by DAI but with no governance and minimal fees. DSC maintains a 1:1 peg with USD through algorithmic stability mechanisms.
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## 🏗️ Overview
 
-## Documentation
+The DSC system consists of two main contracts:
 
-https://book.getfoundry.sh/
+- **DecentralizedStableCoin (DSC)**: The ERC20 stablecoin token
+- **DSCEngine**: Core protocol engine managing collateral, minting, burning, and liquidations
 
-## Usage
+### Key Features
 
-### Build
+- ✨ **Over-collateralized**: Minimum 150% collateralization ratio
+- 🔒 **No governance**: Immutable after deployment
+- ⚡ **Algorithmic stability**: Health factor based liquidation system
+- 💰 **Supported collateral**: WETH and WBTC (extensible)
+- 🛡️ **Secure**: CEI pattern, reentrancy guards, and OracleLib for price freshness
 
-```shell
-$ forge build
-```
+## 📊 Test Coverage
 
-### Test
+| Contract | Lines | Statements | Branches | Functions |
+|----------|-------|------------|----------|-----------|
+| DSCEngine | 91.85% | 88.33% | 71.43% | 100% |
+| DecentralizedStableCoin | 94.74% | 94.12% | 80.00% | 100% |
+| OracleLib | 100% | 100% | 100% | 100% |
+| **Total** | **77.40%** | **75.56%** | **30.26%** | **89.87%** |
 
-```shell
-$ forge test
-```
+## 🚀 Getting Started
 
-### Format
+### Prerequisites
 
-```shell
-$ forge fmt
-```
+- [Foundry](https://getfoundry.sh/)
+- Git
 
-### Gas Snapshots
+### Installation
 
-```shell
-$ forge snapshot
-```
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/foundry-defi-stablecoin
+cd foundry-defi-stablecoin
 
-### Anvil
+# Install dependencies
+make install
 
-```shell
-$ anvil
-```
+# Build the project
+make build
 
-### Deploy
+Testing
+bash
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
+# Run all tests
+make test
 
-### Cast
+# Run specific test
+forge test --mt test_FunctionName -vvv
 
-```shell
-$ cast <subcommand>
-```
+# Run fuzz/invariant tests
+forge test --match-contract InvariantsTest
 
-### Help
+# Generate coverage report
+make coverage
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+📁 Project Structure
+text
+
+foundry-defi-stablecoin/
+├── src/
+│   ├── DSCEngine.sol              # Core protocol engine
+│   ├── DecentralizedStableCoin.sol # Stablecoin token
+│   └── libraries/
+│       └── OracleLib.sol           # Chainlink oracle utilities
+├── test/
+│   ├── unit/                       # Unit tests
+│   │   ├── DSCEngineTest.t.sol
+│   │   ├── DecentralizedStableCoinTest.t.sol
+│   │   └── OracleLibTest.t.sol
+│   ├── fuzz/                        # Fuzzing & invariant tests
+│   │   ├── Handler.t.sol
+│   │   └── InvariantsTest.t.sol
+│   └── mocks/                       # Mock contracts
+│       ├── ERC20Mock.sol
+│       └── MockV3Aggregator.sol
+├── script/                          # Deployment scripts
+│   ├── DeployDSC.s.sol
+│   └── HelperConfig.s.sol
+└── foundry.toml                     # Foundry configuration
+
+🌐 Deployment
+Local Anvil
+bash
+
+# Start Anvil
+make anvil
+
+# In another terminal, deploy
+make deploy
+
+Sepolia Testnet
+bash
+
+# Configure .env file with:
+# SEPOLIA_RPC_URL=your_rpc_url
+# PRIVATE_KEY=your_private_key
+# ETHERSCAN_API_KEY=your_etherscan_key
+
+# Deploy and verify
+make deploy ARGS="--network sepolia"
+
+🧪 Invariants
+
+The protocol maintains these critical invariants:
+
+    Over-collateralization: Total collateral value ≥ total DSC supply
+
+    Oracle freshness: All prices must be updated within the last 3 hours
+
+    Health factor consistency: No user with health factor < 1 can mint new DSC
+
+🔒 Security
+
+    All external functions follow CEI pattern
+
+    ReentrancyGuard on all state-changing functions
+
+    OracleLib ensures price data freshness
+
+    Comprehensive test suite with 94 passing tests
+
+    Fuzzing and invariant testing with 10,000+ calls per invariant
+
+📄 License
+
+This project is licensed under the MIT License.
+🙏 Acknowledgments
+
+Built following Patrick Collins' Foundry course. The protocol design is inspired by MakerDAO's DAI.

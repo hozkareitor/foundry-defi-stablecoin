@@ -20,7 +20,6 @@ contract Handler is StdUtils, Test {
     MockV3Aggregator public ethUsdPriceFeed;
     MockV3Aggregator public btcUsdPriceFeed;
 
-    // Ghost variables - mixedCase naming
     uint256 public ghostTotalCollateralDeposited;
     uint256 public ghostTotalDscMinted;
     uint256 public ghostLiquidations;
@@ -72,7 +71,8 @@ contract Handler is StdUtils, Test {
         uint256 collateralSeed,
         uint256 amountCollateral,
         uint256 actorSeed
-    ) public useRandomActor(actorSeed) {
+    )   public useRandomActor(actorSeed) 
+    {
         ERC20Mock collateral = _getCollateralFromSeed(collateralSeed);
         amountCollateral = bound(amountCollateral, 1, MAX_DEPOSIT_SIZE);
         
@@ -98,7 +98,8 @@ contract Handler is StdUtils, Test {
     function mintDsc(
         uint256 amountDsc,
         uint256 actorSeed
-    ) public useRandomActor(actorSeed) {
+    )   public useRandomActor(actorSeed)
+    {
         amountDsc = bound(amountDsc, 1, MAX_DEPOSIT_SIZE);
         
         if (continueOnRevert) {
@@ -124,7 +125,8 @@ contract Handler is StdUtils, Test {
         uint256 amountCollateral,
         uint256 amountDsc,
         uint256 actorSeed
-    ) public useRandomActor(actorSeed) {
+    )   public useRandomActor(actorSeed) 
+    {
         ERC20Mock collateral = _getCollateralFromSeed(collateralSeed);
         amountCollateral = bound(amountCollateral, 1, MAX_DEPOSIT_SIZE);
         amountDsc = bound(amountDsc, 1, MAX_DEPOSIT_SIZE);
@@ -161,7 +163,8 @@ contract Handler is StdUtils, Test {
         uint256 collateralSeed,
         uint256 amountCollateral,
         uint256 actorSeed
-    ) public useRandomActor(actorSeed) {
+    )   public useRandomActor(actorSeed) 
+    {
         ERC20Mock collateral = _getCollateralFromSeed(collateralSeed);
         uint256 userBalance = dscEngine.getCollateralBalanceOfUser(msg.sender, address(collateral));
         amountCollateral = bound(amountCollateral, 1, userBalance);
@@ -192,7 +195,8 @@ contract Handler is StdUtils, Test {
     function burnDsc(
         uint256 amountDsc,
         uint256 actorSeed
-    ) public useRandomActor(actorSeed) {
+    )   public useRandomActor(actorSeed)
+    {
         uint256 userBalance = dsc.balanceOf(msg.sender);
         amountDsc = bound(amountDsc, 1, userBalance);
         
@@ -220,7 +224,8 @@ contract Handler is StdUtils, Test {
         uint256 userSeed,
         uint256 debtToCover,
         uint256 actorSeed
-    ) public useRandomActor(actorSeed) {
+    )  public useRandomActor(actorSeed) 
+    {
         address userToLiquidate = _getRandomActor(userSeed);
         debtToCover = bound(debtToCover, 1, MAX_DEPOSIT_SIZE);
         
@@ -257,10 +262,10 @@ contract Handler is StdUtils, Test {
         uint256 collateralSeed
     )   public 
     {
-        // Para invariantes, evitamos precios que rompan el protocolo
+        // For invariants, we avoid prices that break the protocol
         if (!continueOnRevert && newPrice == 0)
         {
-        return; // Simplemente ignorar actualizaciones a cero en modo invariante
+        return; // Simply ignore zero updates in invariant mode
         }
 
         int256 intNewPrice = int256(uint256(newPrice));
@@ -278,7 +283,6 @@ contract Handler is StdUtils, Test {
     }
 
     function _getPriceFeed(ERC20Mock collateral) private view returns (MockV3Aggregator) {
-        // Compare addresses, not contract types
         return address(collateral) == address(weth) ? ethUsdPriceFeed : btcUsdPriceFeed;
     }
 
